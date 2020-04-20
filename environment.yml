@@ -1,0 +1,6 @@
+name: word-similarity
+dependencies:
+  - python=3.7  
+  - numpy
+  - scikit-learn
+  - pandas

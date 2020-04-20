@@ -1,0 +1,4 @@
+.env
+main/dataset/w2v/*
+main/dataset/antonym-synonym/*
+main/dataset/model/*

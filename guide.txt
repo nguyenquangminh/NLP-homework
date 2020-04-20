@@ -1,0 +1,28 @@
+## Cai dat anaconda https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+## Tao folder moi truong
+conda create -p=./.env
+
+## Cap nhat moi truong anaconda
+conda env update -f environment.yml -p ./.env --prune
+
+## Su dung moi truong
+conda activate ./.env
+
+## Chay test
+python main/run.py
+
+## Cac task 
+
+#### Test cosine similarity
+python main/run.py --task=0 --word1="chị" --word2="anh" --k=10 
+
+#### Test Cosine Similarity with Visim-400 dataset
+python main/run.py --task=1 
+
+#### Test K nearest words
+python main/run.py --task=2 --word="anh" --k=10 
+python main/run.py --task=2 --word="chị" --k=10 
+
+#### Test Synonym-Antonym Classification
+python main/run.py --task=3
