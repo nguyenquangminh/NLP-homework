@@ -3,6 +3,9 @@
 ## Tao folder moi truong
 conda create -p=./.env
 
+## Them tep w2v vao folder '/Word-Similarity/word2vec'
+## Link: https://drive.google.com/open?id=1z1IDKaZuJXw5g7Yebr1GDq2UfvVR_aGx
+
 ## Cap nhat moi truong anaconda
 conda env update -f environment.yml -p ./.env --prune
 
@@ -12,8 +15,7 @@ conda activate ./.env
 ## Chay test
 python main/run.py
 
-## Cac task 
-
+## Cac task va vi du
 #### Test cosine similarity
 python main/run.py --task=0 --word1="chị" --word2="anh" --k=10 
 

@@ -236,7 +236,7 @@ class TaskSolver:
 
     def gen_w2v_dict(self):
 
-        with open('./main/dataset/w2v/w2v-dict.json', 'r+') as f:
+        with open('./main/dataset/w2v/w2v-dict.json', 'w+') as f:
             
             if f.read(1):
 
