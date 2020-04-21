@@ -8,6 +8,7 @@ from sklearn import preprocessing
 from sklearn.svm import LinearSVC
 from sklearn.metrics import precision_score, recall_score, f1_score
 from datetime import date
+from sklearn.neural_network import MLPClassifier
 
 class TaskSolver:
 
@@ -28,6 +29,8 @@ class TaskSolver:
             self.task_synonym_antonym_classification()
         elif task_name == 'test-cosin-similarity-with-visim-400-dataset':
             self.test_with_visim_400_data_set()
+        elif task_name == 'predict-synonym-antonym':
+            self.predict_synonym_antonym(kwargs.get('word1'), kwargs.get('word2'))
 
     def task_calculate_cosin_similarity(self, word1, word2, print_to_screen=True):
 
@@ -133,24 +136,15 @@ class TaskSolver:
                 word1, word2, relation = line_arr[0], line_arr[1], line_arr[2]
 
                 if word1 in self.W2V_DICT and word2 in self.W2V_DICT:
-                    
-                    np_vec1, np_vec2 = np.array(self.W2V_DICT[word1]), np.array(self.W2V_DICT[word2])
 
-                    vec = np.concatenate((
-                        np_vec1,
-                        np_vec2,
-                        np_vec1 + np_vec2, 
-                        np_vec1 * np_vec2,
-                        np.absolute(np_vec1 - np_vec2),
-                        # np.array([self.task_calculate_cosin_similarity(word1, word2, False)])
-                    ), axis=0)
+                    vec = self.gen_vec_for_synonym_antonym_pair(word1, word2)
 
                     X_test.append(vec)
 
                     if relation == 'SYN': Y_test.append(1)
                     elif relation == 'ANT': Y_test.append(-1)
 
-        X_test = preprocessing.scale(X_test, axis=1)
+        X_test = X_test
         pred = clf.predict(X_test)
 
         print("Test date: {}".format(date.today()))
@@ -171,19 +165,56 @@ class TaskSolver:
             recall_score(Y_test, pred), 
             f1_score(Y_test, pred))
 
-        log_f = open('./main/log', 'w+')
+        log_f = open('./main/log', 'a+')
 
         log_f.write(log)
 
         log_f.close()
 
+    def gen_vec_for_synonym_antonym_pair(self, word1, word2):
+
+        np_vec1, np_vec2 = np.array(self.W2V_DICT[word1]), np.array(self.W2V_DICT[word2])
+
+        return np.concatenate((
+            np_vec1,
+            np_vec2,
+            np_vec1 + np_vec2, 
+            np_vec1 * np_vec2,
+            np.absolute(np_vec1 - np_vec2),
+            # np.array([self.task_calculate_cosin_similarity(word1, word2, False)])
+        ), axis=0)
+
+    def predict_synonym_antonym(self, word1, word2): 
+
+        clf = pickle.load(open('./main/model/svm.model', 'rb'))
+
+        if word1 in self.W2V_DICT and word2 in self.W2V_DICT:
+
+            np_vec1, np_vec2 = np.array(self.W2V_DICT[word1]), np.array(self.W2V_DICT[word2])
+
+            vec = self.gen_vec_for_synonym_antonym_pair(word1, word2)
+
+            pred = clf.predict(np.array([vec]))
+            pred_prob = clf.predict_proba(np.array([vec]))
+            
+            print("The words '{}' and '{}' are {}".format(word1, word2, "Synonymous" if pred[0] == 1 else "Antonymous"))
+            print("Probability is Synonymous: {}".format(pred_prob[0][1]))
+            print("Probability is Antonymous: {}".format(pred_prob[0][0]))
+        else:
+            if word1 not in self.W2V_DICT and print_to_screen: print("Word '{}' not in vocab".format(word1))
+            if word2 not in self.W2V_DICT and print_to_screen: print("Word '{}' not in vocab".format(word2))
+
     def train_synonym_antonym_classification(self):
 
         X_train, Y_train = pickle.load(open('./main/dataset/antonym-synonym/antonym-synonym-pairs.bin', 'rb+'))
 
-        clf = LinearSVC(C=1, verbose=1, class_weight='balanced', dual=False)
+        unique, counts = np.unique(Y_train, return_counts=True)
+
+        label_count = dict(zip(unique, counts))
         
-        clf.fit(preprocessing.scale(X_train, axis=1), Y_train)
+        clf = MLPClassifier()
+        
+        clf.fit(X_train, Y_train)
 
         pickle.dump(clf, open('./main/model/svm.model', 'wb+'))
 
@@ -210,16 +241,7 @@ class TaskSolver:
 
                 if word1 in self.W2V_DICT and word2 in self.W2V_DICT:
 
-                    np_vec1, np_vec2 = np.array(self.W2V_DICT[word1]), np.array(self.W2V_DICT[word2])
-
-                    vec = np.concatenate((
-                        np_vec1,
-                        np_vec2,
-                        np_vec1 + np_vec2, 
-                        np_vec1 * np_vec2,
-                        np.absolute(np_vec1 - np_vec2),
-                        # np.array([self.task_calculate_cosin_similarity(word1, word2, False)])
-                    ), axis=0)
+                    vec = self.gen_vec_for_synonym_antonym_pair(word1, word2)
 
                     X.append(vec)
 
@@ -296,13 +318,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--word1",
         metavar="path",
-        help="Source word used in 'Cosin Similarity' task",
+        help="Source word used in 'Cosin Similarity' and 'Predict Synonym Antonym' task",
     )
 
     parser.add_argument(
         "--word2",
         metavar="path",
-        help="Target word used in 'Cosin Similarity' task",
+        help="Target word used in 'Cosin Similarity' and 'Predict Synonym Antonym' task",
     )
 
     args = parser.parse_args()
@@ -317,7 +339,8 @@ if __name__ == "__main__":
         '0': 'calculate-cosin-similarity',
         '1': 'test-cosin-similarity-with-visim-400-dataset',
         '2': 'k-nearest-words',
-        '3': 'synonym-antonym-classification'
+        '3': 'synonym-antonym-classification',
+        '4': 'predict-synonym-antonym'
     }
 
     task_name = switcher.get(task, "Invalid task")
