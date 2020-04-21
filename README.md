@@ -17,14 +17,17 @@ python main/run.py
 
 ### Cac task va vi du
 #### Test cosine similarity
-python main/run.py --task=0 --word1="chị" --word2="anh" --k=10 
+python main/run.py --task=0 --word1=chị --word2=anh --k=10 
 
 #### Test Cosine Similarity with Visim-400 dataset
 python main/run.py --task=1 
 
 #### Test K nearest words
-python main/run.py --task=2 --word="anh" --k=10 
-python main/run.py --task=2 --word="chị" --k=10 
+python main/run.py --task=2 --word=anh --k=10 
+python main/run.py --task=2 --word=chị --k=10 
 
 #### Test Synonym-Antonym Classification
 python main/run.py --task=3
+
+#### Test Model Prediction
+python main/run.py --task=4 --word1=anh --word2=kết_thúc
