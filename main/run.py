@@ -201,8 +201,8 @@ class TaskSolver:
             print("Probability is Synonymous: {}".format(pred_prob[0][1]))
             print("Probability is Antonymous: {}".format(pred_prob[0][0]))
         else:
-            if word1 not in self.W2V_DICT and print_to_screen: print("Word '{}' not in vocab".format(word1))
-            if word2 not in self.W2V_DICT and print_to_screen: print("Word '{}' not in vocab".format(word2))
+            if word1 not in self.W2V_DICT: print("Word '{}' not in vocab".format(word1))
+            if word2 not in self.W2V_DICT: print("Word '{}' not in vocab".format(word2))
 
     def train_synonym_antonym_classification(self):
 
